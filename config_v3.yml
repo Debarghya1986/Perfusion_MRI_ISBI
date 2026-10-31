@@ -1,0 +1,163 @@
+project_name: ISBI_2027_SyntheticV3
+seed: 0
+device: auto
+
+paths:
+  data_root: data/perfusion_v3
+  output_root: outputs/v3
+  ccd_checkpoint: checkpoints/ccd3d_v3/ccd3d_v3_best.pt
+  spinned_checkpoint: checkpoints/spinned_v3/best.pt
+
+# Literature-anchored Synthetic V3.
+# Spatial/tissue statistics: Giacalone et al., Magn Reson Med 2017.
+# Temporal residue families: Pizzolato et al., ISBI 2015.
+dataset:
+  train_size: 512
+  val_size: 128
+  test_size: 120
+  H: 66
+  W: 77
+  dt: 1.0
+  duration_s: 56.0
+  family_mode: balanced_cases
+  overwrite: false
+
+  # Numerical network scaling only: h_net = h_phys / (cbf_reference/60).
+  # Biological CBF values are NOT clipped to this reference.
+  cbf_reference: 100.0
+
+  tissue_classes:
+    healthy_gray:
+      label: 1
+      cbf_mean: 60.0
+      cbf_sd: 9.0
+      mtt_mean: 4.0
+      mtt_sd: 2.2
+    healthy_white:
+      label: 2
+      cbf_mean: 25.0
+      cbf_sd: 2.1
+      mtt_mean: 4.8
+      mtt_sd: 3.2
+    ischemic_core:
+      label: 3
+      cbf_mean: 10.0
+      cbf_sd: 4.3
+      mtt_mean: 10.0
+      mtt_sd: 5.0
+    cbf_lower: 0.0
+    cbf_upper: 200.0
+    mtt_lower: 0.25
+    mtt_upper: 25.0
+
+  # Four lesion-shape archetypes described by Giacalone et al.
+  # Exact I-KNOW masks are not distributed with the paper, so geometry below
+  # is an explicit literature-inspired implementation choice.
+  lesion_shapes:
+    - small_compact
+    - large_compact
+    - medium_fragmented
+    - large_fragmented
+
+  # Pizzolato temporal families.
+  biexponential:
+    A: 0.95
+    tau1: 0.68
+    tau2: 0.05
+  pharmacokinetic:
+    lambda2: 0.21
+    lambda3: 0.36
+    reference_mtt: 2.2
+
+  # Giacalone global gamma-variate AIF.
+  aif:
+    ymax: 0.6124
+    tmax: 4.5
+    arrival_d: 3.0
+    alpha: 3.0
+
+  # Giacalone MR signal-domain noise model.
+  noise:
+    snr_db: 40.0
+    S0: 200.0
+    TE_s: 0.05
+    target_peak_signal_drop: 0.40
+
+ccd_training:
+  checkpoint_dir: checkpoints/ccd3d_v3
+  output_dir: outputs/v3/ccd3d_training
+  epochs: 600
+  batch_size: 2
+  num_workers: 2
+  lr: 0.001
+  min_lr: 0.000001
+  weight_decay: 0.0
+  sigma_min_255: 0.0
+  sigma_max_255: 25.0
+  val_sigma_255: 15.0
+  validate_every: 1
+  seed: 0
+  amp: true
+  channels: [1, 4, 8, 64]
+  kernel_mode: spatial_temporal   # spatial_temporal -> 3x3x3; temporal_only -> 3x1x1
+  init_tau: 0.05
+  tau_min: 0.0102
+  tau_max: 0.135
+
+red:
+  normalize_forward: true
+  alpha_numerator: 0.95
+  max_iter: 5000
+  min_iter: 20
+  tol: 1.0e-5
+  batch_size: 16
+
+prior_tuning:
+  objective: mean_map_nrmse
+  lambda_red_candidates: [0.05, 0.1, 0.2, 0.4, 0.8]
+  ccd_sigma_255_candidates: [4]
+  tv_weight_candidates: [0.00005, 0.0001, 0.0002, 0.0005, 0.001]
+  bm4d_sigma_candidates: [0.01, 0.02, 0.04, 0.06, 0.08]
+
+tv:
+  inner_iterations: 40
+  primal_step: 0.25
+  dual_step: 0.25
+  theta: 1.0
+
+bm4d:
+  backend: reference
+
+methods:
+  include: [red_ccd, red_bm4d, red_tv, osvd, meb, pinn, spinned]
+  osvd_threshold: 0.20
+  osvd_padding_factor: 2
+  meb_basis_order: 30
+  meb_mttmax_factor: 4.0
+  meb_tau_min: 0.0
+  meb_tau_max: 0.0
+  meb_tau_step: 0.25
+  pinn_epochs: 2000
+  pinn_hidden_width: 32
+  pinn_hidden_layers: 4
+  pinn_peak_lr: 0.005
+  pinn_end_lr: 0.00005
+  pinn_lambda_en: 0.5
+  pinn_lambda_tv: 0.5
+  spinned_hidden_dims: [256, 256, 128]
+  spinned_epochs: 300
+  spinned_lr: 0.001
+  spinned_min_lr: 0.00001
+  spinned_case_batch_size: 4
+  spinned_voxels_per_case: 256
+
+evaluation:
+  eps_relative: 1.0e-8
+  tissue_labels:
+    1: healthy_gray
+    2: healthy_white
+    3: ischemic_core
+
+visuals:
+  dpi: 220
+  methods_for_maps: [red_ccd, red_tv, red_bm4d, osvd, meb, spinned]

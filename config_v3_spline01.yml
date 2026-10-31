@@ -1,0 +1,16 @@
+# Standalone experiment settings. No original config or checkpoint is changed.
+base_config: config_v3_model_consistent.yml
+experiment:
+  name: spline01_sigma10
+  spline_x_min: 0.0
+  spline_x_max: 1.0
+  spline_num_knots: 28
+  spline_input_multiplier: 10.0   # sigma is in real normalized AWGN units, e.g. 25/255
+  checkpoint_dir: checkpoints_ccd3d_spline01
+  inference_checkpoint: checkpoints_ccd3d_spline01/ccd3d_spline01_best_inference.pt
+  training_output_dir: outputs/v3/spline01/denoiser_training
+  reconstruction_output_dir: outputs/v3/spline01/nonnegative_red
+  # Keep original solver hyperparameters FIXED initially. Any new tuning must use validation only.
+  lambda_red: 3.2
+  prior_strength_255: 3.0
+  conditions: [baseline, delayed, broad]

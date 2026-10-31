@@ -1,0 +1,39 @@
+# SAME V1/V2 SPINNED-style benchmark, with dataset-only V3 changes.
+data_root: data/perfusion_v3
+output_dir: outputs/v3/spinned_style
+
+device: cuda
+seed: 0
+noise_seed: 123
+
+# Dataset-required change: V3 has 57 samples instead of V2's 45.
+timepoints: 57
+
+# SAME model architecture.
+hidden_dims: [256, 256, 128]
+activation: silu
+dropout: 0.0
+
+# SAME training hyperparameters.
+epochs: 300
+case_batch_size: 8
+eval_case_batch_size: 8
+voxels_per_case: 128
+num_workers: 2
+
+lr: 0.001
+min_lr: 0.00001
+weight_decay: 0.000001
+grad_clip_norm: 5.0
+
+trf_loss_weight: 1.0
+physics_loss_weight: 1.0
+
+# V3 C_obs already contains the intended MR acquisition noise.
+# Therefore do NOT add a second artificial CNR perturbation.
+# This is a DATA adaptation; the old augmentation code remains untouched.
+train_cnr_values: [null]
+validation_cnr: null
+validate_every: 1
+
+eps_relative: 1.0e-8

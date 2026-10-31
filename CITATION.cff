@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this research software, please cite the accompanying manuscript."
+title: "Trained Spatiotemporal Regularization for Perfusion MRI Deconvolution"
+type: software
+authors:
+  - family-names: Nandi
+    given-names: Debarghya
+  - family-names: Mukherjee
+    given-names: Trishit
+  - family-names: Chaudhury
+    given-names: Kunal N.
+url: "https://github.com/Debarghya1986/Perfusion_MRI_ISBI"

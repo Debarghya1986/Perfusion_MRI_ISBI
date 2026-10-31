@@ -1,0 +1,5 @@
+# Optional dependencies for CUDA 12.x BM4D
+# Dependencies for the CUDA BM4D implementation.
+-r requirements.txt
+PyWavelets>=1.5
+cupy-cuda12x

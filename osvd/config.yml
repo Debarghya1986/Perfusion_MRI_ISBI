@@ -1,0 +1,21 @@
+# Final oSVD comparator for ISBI 2027 Synthetic V2.
+#
+# Pizzolato et al. (ISBI 2015) compare MEB with a block-circulant
+# truncated-SVD comparator reported as "oSVD (20%)".
+#
+# No validation or test-set tuning is performed here.
+
+data_root: data/perfusion_v2
+output_dir: outputs/synthetic_v2/osvd_fixed20_check
+
+# Fixed literature comparator.
+threshold: 0.20
+padding_factor: 2
+
+# Keep the raw truncated-SVD response. Negative oscillations are a property of
+# the comparator itself. The common Synthetic V2 evaluator clips only when
+# extracting perfusion maps, identically for every method.
+nonnegative: false
+
+eps_relative: 1.0e-8
+max_cases: null

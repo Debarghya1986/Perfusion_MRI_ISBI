@@ -1,0 +1,44 @@
+# Rotkopf et al. (Medical Physics, 2024) PINN benchmark
+# adapted to the CLEAN ISBI 2027 Synthetic V2 experiment.
+#
+# IMPORTANT:
+# The paper's synthetic hyperparameters (lambda_en=lambda_tv=0.5) were tuned
+# on raw synthetic gamma-variate AIF / concentration curves. The paper mentions
+# rescaling AIF and concentration to max(AIF) in the IN-VIVO processing section.
+# Therefore, for our Synthetic V2 benchmark we DO NOT divide A and C by max(AIF).
+#
+# No h/CBF/CBV/MTT ground truth enters optimization.
+
+data_root: data/perfusion_v3
+output_dir: outputs/v3/rotkopf_pinn_check_rawscale
+
+device: auto
+seed: 0
+
+# Paper: 1 input -> 4 x 32 hidden nodes -> 1 output, Swish.
+hidden_layers: 4
+hidden_width: 32
+
+# Rotkopf et al.: AdamW, cosine schedule, 2000 epochs,
+# peak LR 5e-3, end LR 5e-5.
+epochs: 2000
+peak_lr: 0.005
+end_lr: 0.00005
+weight_decay: 0.0
+
+# Paper-selected fixed regularization weights.
+lambda_en: 0.5
+lambda_tv: 0.5
+
+# Synthetic experiment: preserve the scale on which the paper tuned the
+# regularization weights.
+normalize_forward: false
+
+# Figure 1 of the paper includes a fitted scaling factor.
+use_output_scale: true
+
+log_every: 250
+eps_relative: 1.0e-8
+
+# null = full 120-case held-out test set.
+max_cases: null

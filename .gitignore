@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+.env.*
+!.env.example
+
+# Generated datasets and outputs
+data/
+outputs/
+*.npz
+*.npy
+*.h5
+*.hdf5
+*.log
+
+# Temporary files and backups
+.DS_Store
+.vscode/
+_backup*/
+*.tmp
+
+# Exclude arbitrary checkpoints
+*.pt
+*.pth
+*.ckpt
+
+# Allow only the two final published checkpoints
+!checkpoints_ccd3d_spline01/ccd3d_spline01_best_inference.pt
+!checkpoints/spinned_style_best.pt
+
